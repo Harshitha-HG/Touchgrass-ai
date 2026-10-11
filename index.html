@@ -391,20 +391,36 @@ Do not recommend dangerous activities.
 
 
           if (
-            generatedText &&
-            generatedText.trim().length > 0
-          ) {
+  generatedText &&
+  generatedText.trim().length > 0
+) {
 
-            result.innerText =
-              generatedText;
+  result.innerText = generatedText;
 
-          } else {
+} else {
 
-            result.innerText =
-              "⚠️ The AI did not return a mission. " +
-              "Please try again.";
+  result.innerText =
+`🌿 YOUR TOUCHGRASS MISSION
 
-          }
+MISSION NAME:
+${activity.charAt(0).toUpperCase() + activity.slice(1)} Adventure
+
+WHAT TO DO:
+Spend ${time} outside doing ${activity} at a comfortable pace.
+
+STEP-BY-STEP PLAN:
+1. Leave your phone in your pocket.
+2. Find a safe outdoor place.
+3. Spend your available time exploring and enjoying your surroundings.
+4. Return when your time is complete.
+
+PHONE-DOWN CHALLENGE:
+Keep your phone away for the entire mission. Only use it if you need it for safety.
+
+ENCOURAGEMENT:
+You don't need a perfect plan — just step outside and start. 🌱`;
+
+}
 
 
         } catch (error) {
