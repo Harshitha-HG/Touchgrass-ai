@@ -4,9 +4,262 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TouchGrass AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #dff7df, #f5fff2);
+      color: #173b1b;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 25px 10px;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #456b49;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    select,
+    input,
+    button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #c9ddca;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 22px;
+      background: #2e7d32;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #256628;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #527356;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f0faef;
+      border-radius: 15px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #d8f0d6;
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>🌿 TouchGrass AI</h1>
-  <p>Your AI-powered outdoor activity planner.</p>
+
+  <div class="container">
+
+    <div class="hero">
+      <div class="badge">🌱 Open-Source AI Project</div>
+
+      <h1>🌿 TouchGrass AI</h1>
+
+      <p class="subtitle">
+        AI-powered missions that help you put your phone down
+        and step outside.
+      </p>
+    </div>
+
+    <div class="card">
+
+      <h2>Plan your outdoor mission</h2>
+
+      <label for="time">How much time do you have?</label>
+
+      <select id="time">
+        <option value="15 minutes">15 minutes</option>
+        <option value="30 minutes">30 minutes</option>
+        <option value="1 hour">1 hour</option>
+        <option value="2 hours">2+ hours</option>
+      </select>
+
+      <label for="activity">What sounds good?</label>
+
+      <select id="activity">
+        <option value="walking">Walking</option>
+        <option value="nature">Nature exploration</option>
+        <option value="exercise">Exercise</option>
+        <option value="social">Meeting friends</option>
+        <option value="creative">Outdoor creativity</option>
+      </select>
+
+      <label for="energy">Your current energy</label>
+
+      <select id="energy">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+
+      <button onclick="generateMission()">
+        🌳 Generate My TouchGrass Mission
+      </button>
+
+      <div id="status"></div>
+
+      <div id="result">
+        Your personalized outdoor mission will appear here.
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module">
+
+    import { CreateMLCEngine }
+      from "https://esm.run/@mlc-ai/web-llm";
+
+    let engine = null;
+
+    async function loadAI() {
+
+      document.getElementById("status").innerText =
+        "🤖 Loading open-source AI model... This may take a little time the first time.";
+
+      try {
+
+        engine = await CreateMLCEngine(
+          "SmolLM2-360M-Instruct-q4f16_1-MLC"
+        );
+
+        document.getElementById("status").innerText =
+          "✅ Open-source AI is ready!";
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("status").innerText =
+          "⚠️ AI model could not load on this device.";
+
+      }
+    }
+
+    window.generateMission = async function() {
+
+      const time = document.getElementById("time").value;
+      const activity = document.getElementById("activity").value;
+      const energy = document.getElementById("energy").value;
+
+      const result = document.getElementById("result");
+
+      if (!engine) {
+
+        result.innerText =
+          "Please wait while the open-source AI model loads.";
+
+        return;
+      }
+
+      result.innerText = "🌱 Creating your outdoor mission...";
+
+      const prompt = `
+You are TouchGrass AI, an encouraging outdoor activity planner.
+
+Create one simple outdoor mission.
+
+User information:
+Time available: ${time}
+Preferred activity: ${activity}
+Energy level: ${energy}
+
+Give:
+1. Mission name
+2. What to do
+3. A simple step-by-step plan
+4. A phone-down challenge
+5. One encouraging sentence
+
+Keep it practical, safe and enjoyable.
+`;
+
+      try {
+
+        const response = await engine.chat.completions.create({
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 250
+        });
+
+        result.innerText =
+          response.choices[0].message.content;
+
+      } catch (error) {
+
+        console.error(error);
+
+        result.innerText =
+          "Something went wrong while generating your mission.";
+      }
+    };
+
+    loadAI();
+
+  </script>
+
 </body>
 </html>
