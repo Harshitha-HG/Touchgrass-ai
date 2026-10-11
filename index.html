@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>TouchGrass AI</title>
 
   <style>
@@ -43,7 +45,7 @@
       background: white;
       padding: 25px;
       border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
       margin-top: 20px;
     }
 
@@ -55,7 +57,6 @@
     }
 
     select,
-    input,
     button {
       width: 100%;
       padding: 13px;
@@ -77,6 +78,11 @@
       background: #256628;
     }
 
+    button:disabled {
+      background: #9db99e;
+      cursor: not-allowed;
+    }
+
     #status {
       margin-top: 15px;
       font-size: 14px;
@@ -90,6 +96,7 @@
       border-radius: 15px;
       line-height: 1.6;
       white-space: pre-wrap;
+      min-height: 120px;
     }
 
     .badge {
@@ -100,6 +107,13 @@
       font-size: 13px;
       margin-top: 10px;
     }
+
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 13px;
+      color: #527356;
+    }
   </style>
 </head>
 
@@ -108,7 +122,10 @@
   <div class="container">
 
     <div class="hero">
-      <div class="badge">🌱 Open-Source AI Project</div>
+
+      <div class="badge">
+        🌱 Open-Source AI Project
+      </div>
 
       <h1>🌿 TouchGrass AI</h1>
 
@@ -116,32 +133,45 @@
         AI-powered missions that help you put your phone down
         and step outside.
       </p>
+
     </div>
 
     <div class="card">
 
       <h2>Plan your outdoor mission</h2>
 
-      <label for="time">How much time do you have?</label>
+      <label for="time">
+        How much time do you have?
+      </label>
 
       <select id="time">
         <option value="15 minutes">15 minutes</option>
         <option value="30 minutes">30 minutes</option>
         <option value="1 hour">1 hour</option>
-        <option value="2 hours">2+ hours</option>
+        <option value="2+ hours">2+ hours</option>
       </select>
 
-      <label for="activity">What sounds good?</label>
+      <label for="activity">
+        What sounds good?
+      </label>
 
       <select id="activity">
         <option value="walking">Walking</option>
-        <option value="nature">Nature exploration</option>
+        <option value="nature exploration">
+          Nature exploration
+        </option>
         <option value="exercise">Exercise</option>
-        <option value="social">Meeting friends</option>
-        <option value="creative">Outdoor creativity</option>
+        <option value="meeting friends">
+          Meeting friends
+        </option>
+        <option value="outdoor creativity">
+          Outdoor creativity
+        </option>
       </select>
 
-      <label for="energy">Your current energy</label>
+      <label for="energy">
+        Your current energy
+      </label>
 
       <select id="energy">
         <option value="low">Low</option>
@@ -149,11 +179,13 @@
         <option value="high">High</option>
       </select>
 
-      <button onclick="generateMission()">
-        🌳 Generate My TouchGrass Mission
+      <button id="generateButton" onclick="generateMission()" disabled>
+        🌳 Loading AI...
       </button>
 
-      <div id="status"></div>
+      <div id="status">
+        🤖 Loading open-source AI model...
+      </div>
 
       <div id="result">
         Your personalized outdoor mission will appear here.
@@ -161,19 +193,43 @@
 
     </div>
 
+    <div class="footer">
+      Built with open-source AI • TouchGrass AI 🌱
+    </div>
+
   </div>
+
 
   <script type="module">
 
-    import { CreateMLCEngine }
-      from "https://esm.run/@mlc-ai/web-llm";
+    import {
+      CreateMLCEngine
+    } from "https://esm.run/@mlc-ai/web-llm";
+
 
     let engine = null;
 
+
+    const status =
+      document.getElementById("status");
+
+    const result =
+      document.getElementById("result");
+
+    const button =
+      document.getElementById("generateButton");
+
+
     async function loadAI() {
 
-      document.getElementById("status").innerText =
-        "🤖 Loading open-source AI model... This may take a little time the first time.";
+      status.innerText =
+        "🤖 Loading open-source AI model...";
+
+      button.disabled = true;
+
+      button.innerText =
+        "🌳 Loading AI...";
+
 
       try {
 
@@ -181,85 +237,210 @@
           "SmolLM2-360M-Instruct-q4f16_1-MLC"
         );
 
-        document.getElementById("status").innerText =
+
+        status.innerText =
           "✅ Open-source AI is ready!";
 
+
+        button.disabled = false;
+
+        button.innerText =
+          "🌳 Generate My TouchGrass Mission";
+
+
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          "AI loading error:",
+          error
+        );
 
-        document.getElementById("status").innerText =
-          "⚠️ AI model could not load on this device.";
+
+        status.innerText =
+          "⚠️ AI could not load on this device.";
+
+
+        result.innerText =
+          "The open-source AI model could not start. " +
+          "Please try Chrome on a device with WebGPU support.";
+
+
+        button.disabled = true;
 
       }
+
     }
 
-    window.generateMission = async function() {
 
-      const time = document.getElementById("time").value;
-      const activity = document.getElementById("activity").value;
-      const energy = document.getElementById("energy").value;
+    window.generateMission =
+      async function () {
 
-      const result = document.getElementById("result");
 
-      if (!engine) {
+        if (!engine) {
+
+          result.innerText =
+            "Please wait until the AI is ready.";
+
+          return;
+
+        }
+
+
+        const time =
+          document.getElementById("time").value;
+
+
+        const activity =
+          document.getElementById("activity").value;
+
+
+        const energy =
+          document.getElementById("energy").value;
+
 
         result.innerText =
-          "Please wait while the open-source AI model loads.";
+          "🌱 Creating your outdoor mission...";
 
-        return;
-      }
 
-      result.innerText = "🌱 Creating your outdoor mission...";
+        button.disabled = true;
 
-      const prompt = `
-You are TouchGrass AI, an encouraging outdoor activity planner.
+        button.innerText =
+          "🌱 Creating mission...";
 
-Create one simple outdoor mission.
+
+        const prompt = `
+
+You are TouchGrass AI,
+an encouraging outdoor activity planner.
+
+Create ONE simple and realistic outdoor mission.
 
 User information:
-Time available: ${time}
-Preferred activity: ${activity}
-Energy level: ${energy}
 
-Give:
-1. Mission name
-2. What to do
-3. A simple step-by-step plan
-4. A phone-down challenge
-5. One encouraging sentence
+Time available:
+${time}
 
-Keep it practical, safe and enjoyable.
+Preferred activity:
+${activity}
+
+Energy level:
+${energy}
+
+
+Give the answer in this exact structure:
+
+MISSION NAME:
+Give a short creative name.
+
+WHAT TO DO:
+Explain the outdoor activity.
+
+STEP-BY-STEP PLAN:
+Give 3 or 4 simple steps.
+
+PHONE-DOWN CHALLENGE:
+Give one challenge that encourages the user
+to keep their phone away.
+
+ENCOURAGEMENT:
+Give one short motivating sentence.
+
+
+Keep the activity practical,
+safe, enjoyable,
+and suitable for the available time.
+
+Do not recommend dangerous activities.
 `;
 
-      try {
 
-        const response = await engine.chat.completions.create({
-          messages: [
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 250
-        });
+        try {
 
-        result.innerText =
-          response.choices[0].message.content;
 
-      } catch (error) {
+          const response =
+            await engine.chat.completions.create({
 
-        console.error(error);
+              messages: [
 
-        result.innerText =
-          "Something went wrong while generating your mission.";
-      }
-    };
+                {
+                  role: "system",
+                  content:
+                    "You are TouchGrass AI, " +
+                    "a helpful outdoor activity planner."
+                },
+
+                {
+                  role: "user",
+                  content: prompt
+                }
+
+              ],
+
+              temperature: 0.7,
+
+              max_tokens: 250
+
+            });
+
+
+          const generatedText =
+            response
+              ?.choices?.[0]
+              ?.message
+              ?.content;
+
+
+          if (
+            generatedText &&
+            generatedText.trim().length > 0
+          ) {
+
+            result.innerText =
+              generatedText;
+
+          } else {
+
+            result.innerText =
+              "⚠️ The AI did not return a mission. " +
+              "Please try again.";
+
+          }
+
+
+        } catch (error) {
+
+
+          console.error(
+            "AI generation error:",
+            error
+          );
+
+
+          result.innerText =
+            "⚠️ Something went wrong while " +
+            "generating your mission.\n\n" +
+            "Please wait a moment and try again.";
+
+
+        } finally {
+
+
+          button.disabled = false;
+
+          button.innerText =
+            "🌳 Generate My TouchGrass Mission";
+
+        }
+
+      };
+
 
     loadAI();
 
   </script>
 
 </body>
+
 </html>
+    
+      
